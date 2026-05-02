@@ -360,7 +360,7 @@ function buildDetailMarkdown(
     .join("\n");
 
   const majorUpdateNote = skipMajorVersions
-    ? `\n\n> ⚠️ Major version updates are hidden. Enable "Skip major versions" in preferences to show them.`
+    ? `\n\n> ⚠️ Major version updates are hidden. Disable "Skip major versions" in preferences to show them.`
     : "";
 
   return `## ${status.name}\n\n${header}\n${rows}${majorUpdateNote}`;
