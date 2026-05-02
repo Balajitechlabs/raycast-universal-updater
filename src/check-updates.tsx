@@ -15,7 +15,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { execFileSync } from "child_process";
+import { execFileSync } from "node:child_process";
 
 import {
   EcosystemId,
@@ -32,7 +32,6 @@ import {
   checkPnpm,
   checkYarn,
   installPackage,
-  isEcosystemAvailable,
   listInstalledPackages,
   upgradeBrew,
   upgradeCargo,
@@ -45,7 +44,6 @@ import {
   upgradePnpm,
   upgradeYarn,
 } from "./ecosystems";
-import { createBackup } from "./export-backups";
 
 type StatusFilter = "all" | "outdated" | "uptodate" | "errors";
 type StatusKind = Exclude<StatusFilter, "all">;
@@ -55,7 +53,7 @@ interface EcosystemDef {
   id: EcosystemId;
   name: string;
   icon: Icon;
-  preferenceKey: keyof Preferences;
+  preferenceKey: keyof ExtensionPreferences;
   checker: () => Promise<OutdatedPackage[]>;
   upgrader: () => Promise<string>;
   checkCommand: string;
@@ -77,9 +75,20 @@ const ECOSYSTEM_DEFS: EcosystemDef[] = [
   },
   {
     id: "npm",
-    isEcosystemAvailable,
     name: "npm (global)",
-  import { createBackup } from "./export-backups";
+    icon: Icon.Box,
+    preferenceKey: "enableNpm",
+    checker: checkNpm,
+    upgrader: upgradeNpm,
+    checkCommand: "npm outdated -g --json",
+    upgradeCommand: "npm update -g",
+    dryRunCommand: "npm outdated -g --json",
+  },
+  {
+    id: "yarn",
+    name: "yarn (global)",
+    icon: Icon.Layers,
+    preferenceKey: "enableYarn",
     checker: checkYarn,
     upgrader: upgradeYarn,
     checkCommand: "yarn global outdated --json",
@@ -858,7 +867,7 @@ function formatTimeAgo(timestamp: number): string {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
   const enabledDefs = useMemo(
     () => ECOSYSTEM_DEFS.filter((def) => prefs[def.preferenceKey]),
     [prefs],

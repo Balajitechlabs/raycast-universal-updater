@@ -44,7 +44,7 @@ export async function createBackup(): Promise<{
   hiddenPath: string;
 }> {
   // prefs resolved where used in callers; Raycast generates `Preferences` type
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
 
   const enabledIds = (
     [
@@ -62,7 +62,7 @@ export async function createBackup(): Promise<{
   ).filter(
     (id) =>
       prefs[
-        `enable${id.charAt(0).toUpperCase() + id.slice(1)}` as keyof Preferences
+        `enable${id.charAt(0).toUpperCase() + id.slice(1)}` as keyof ExtensionPreferences
       ],
   );
 
@@ -115,7 +115,7 @@ export async function createBackup(): Promise<{
   // Send macOS notification
   try {
     const notifScript = `display notification "Backup created with ${packageCount} packages" with title "Universal Updater" subtitle "${filename}"`;
-    const escaped = notifScript.replaceAll("'", "'\\''";
+    const escaped = notifScript.replaceAll("'", "'\\''");
     execSync(`osascript -e '${escaped}'`);
   } catch {
     // Notification not critical
@@ -173,7 +173,7 @@ async function rollbackToBackup(filePath: string): Promise<string> {
   // Send success notification
   try {
     const notifScript = `display notification "${totalRestored} packages restored" with title "Universal Updater" subtitle "Restore completed"`;
-    const escaped = notifScript.replaceAll("'", "'\\''";
+    const escaped = notifScript.replaceAll("'", "'\\''");
     execSync(`osascript -e '${escaped}'`);
   } catch {
     // Notification not critical
@@ -369,7 +369,7 @@ export default function Command() {
       // Use macOS file picker via osascript
       const script = `set response to (choose file of type {"public.json", "com.apple.json"} with prompt "Select backup JSON file")
 return POSIX path of response`;
-      const escaped = script.replaceAll("'", "'\\''";
+      const escaped = script.replaceAll("'", "'\\''");
       const result = execSync(
         `osascript -e '${escaped}'`,
         {
