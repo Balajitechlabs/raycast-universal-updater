@@ -36,6 +36,7 @@ import {
   upgradeMas,
   upgradeGo,
 } from "./ecosystems";
+import { createBackup } from "./export-backups";
 
 type EcosystemJob = {
   name: string;
@@ -205,15 +206,15 @@ export default async function Command() {
 
   // Backup before upgrade
   if (prefs.backupBeforeUpgrade) {
-    for (const job of enabled) {
-      try {
-        const outdated = await job.check();
-        if (outdated.length > 0) {
-          console.log(`Backup ${job.name}: ${JSON.stringify(outdated)}`);
-        }
-      } catch {
-        // Continue even if backup fails
-      }
+    try {
+      await createBackup();
+    } catch (error: unknown) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Backup failed",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return;
     }
   }
 

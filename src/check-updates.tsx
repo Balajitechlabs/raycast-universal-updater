@@ -32,6 +32,7 @@ import {
   checkPnpm,
   checkYarn,
   installPackage,
+  isEcosystemAvailable,
   listInstalledPackages,
   upgradeBrew,
   upgradeCargo,
@@ -44,6 +45,7 @@ import {
   upgradePnpm,
   upgradeYarn,
 } from "./ecosystems";
+import { createBackup } from "./export-backups";
 
 type StatusFilter = "all" | "outdated" | "uptodate" | "errors";
 type StatusKind = Exclude<StatusFilter, "all">;
@@ -676,11 +678,22 @@ function EcosystemActionPanel({
             title="Backup Current Versions"
             icon={Icon.Shield}
             onAction={async () => {
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Backup created",
-                message: `Versions saved for ${status.name}`,
-              });
+              try {
+                await createBackup();
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Backup created",
+                  message: `Versions saved for ${status.name}`,
+                });
+              } catch (error: unknown) {
+                const message =
+                  error instanceof Error ? error.message : String(error);
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Backup failed",
+                  message,
+                });
+              }
             }}
           />
         )}
@@ -895,10 +908,6 @@ export default function Command() {
     await Promise.all(
       enabledDefs.map(async (d) => {
         try {
-          // dynamic import to avoid cycles
-          // isEcosystemAvailable is exported from ecosystems
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const { isEcosystemAvailable } = await import("./ecosystems");
           const ok = await isEcosystemAvailable(d.id);
           map.set(d.id, ok);
         } catch {
@@ -1002,10 +1011,17 @@ export default function Command() {
     }
 
     if (prefs.backupBeforeUpgrade) {
-      const backupData = status.packages
-        .map((p) => `${p.name}: ${p.current}`)
-        .join("\n");
-      console.log(`Backup for ${status.name}:\n${backupData}`);
+      try {
+        await createBackup();
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Backup failed",
+          message,
+        });
+        return;
+      }
     }
 
     const toast = await showToast({
