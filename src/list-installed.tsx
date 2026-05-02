@@ -143,7 +143,7 @@ ${rows.join("\n")}`;
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues() as Record<string, any>;
   const enabledEcosystems = useMemo(
     () =>
       (
@@ -160,10 +160,7 @@ export default function Command() {
           "go",
         ] as EcosystemId[]
       ).filter(
-        (id) =>
-          prefs[
-            `enable${id.charAt(0).toUpperCase() + id.slice(1)}` as keyof Preferences
-          ],
+        (id) => prefs[`enable${id.charAt(0).toUpperCase() + id.slice(1)}`],
       ),
     [],
   );

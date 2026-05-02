@@ -46,7 +46,7 @@ type EcosystemJob = {
 };
 
 export default async function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues() as Record<string, any>;
 
   const jobs: EcosystemJob[] = [
     {

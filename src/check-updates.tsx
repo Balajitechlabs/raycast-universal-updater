@@ -55,7 +55,7 @@ interface EcosystemDef {
   id: EcosystemId;
   name: string;
   icon: Icon;
-  preferenceKey: keyof ExtensionPreferences;
+  preferenceKey: string;
   checker: () => Promise<OutdatedPackage[]>;
   upgrader: () => Promise<string>;
   checkCommand: string;
@@ -880,7 +880,7 @@ function formatTimeAgo(timestamp: number): string {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues() as Record<string, any>;
   const enabledDefs = useMemo(
     () => ECOSYSTEM_DEFS.filter((def) => prefs[def.preferenceKey]),
     [prefs],

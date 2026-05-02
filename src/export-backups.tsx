@@ -43,8 +43,7 @@ export async function createBackup(): Promise<{
   desktopPath: string;
   hiddenPath: string;
 }> {
-  // prefs resolved where used in callers; Raycast generates `Preferences` type
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues() as Record<string, any>;
 
   const enabledIds = (
     [
@@ -59,12 +58,7 @@ export async function createBackup(): Promise<{
       "mas",
       "go",
     ] as EcosystemId[]
-  ).filter(
-    (id) =>
-      prefs[
-        `enable${id.charAt(0).toUpperCase() + id.slice(1)}` as keyof ExtensionPreferences
-      ],
-  );
+  ).filter((id) => prefs[`enable${id.charAt(0).toUpperCase() + id.slice(1)}`]);
 
   const backup: Record<string, Record<string, string>> = {};
   let packageCount = 0;
