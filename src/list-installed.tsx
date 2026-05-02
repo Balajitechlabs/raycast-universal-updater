@@ -17,19 +17,6 @@ import {
   isEcosystemAvailable,
 } from "./ecosystems";
 
-interface Preferences {
-  enableBrew: boolean;
-  enableNpm: boolean;
-  enableYarn: boolean;
-  enablePnpm: boolean;
-  enablePip: boolean;
-  enablePipx: boolean;
-  enableCargo: boolean;
-  enableGem: boolean;
-  enableMas: boolean;
-  enableGo: boolean;
-}
-
 type EcosystemEntry = {
   id: EcosystemId;
   name: string;
@@ -83,10 +70,12 @@ async function loadInstalledPackages(
   );
 }
 
-function EcosystemDetailView(props: {
-  ecosystem: EcosystemEntry;
-  onRefresh: () => void;
-}) {
+function EcosystemDetailView(
+  props: Readonly<{
+    ecosystem: EcosystemEntry;
+    onRefresh: () => void;
+  }>,
+) {
   const { ecosystem, onRefresh } = props;
 
   if (!ecosystem.available) {

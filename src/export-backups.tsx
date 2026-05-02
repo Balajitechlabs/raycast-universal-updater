@@ -17,10 +17,10 @@ import {
   mkdirSync,
   readdirSync,
   statSync,
-} from "fs";
-import { homedir } from "os";
-import { join } from "path";
-import { execSync } from "child_process";
+} from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { execSync } from "node:child_process";
 
 import {
   EcosystemId,
@@ -28,19 +28,6 @@ import {
   isEcosystemAvailable,
   installPackage,
 } from "./ecosystems";
-
-interface Preferences {
-  enableBrew: boolean;
-  enableNpm: boolean;
-  enableYarn: boolean;
-  enablePnpm: boolean;
-  enablePip: boolean;
-  enablePipx: boolean;
-  enableCargo: boolean;
-  enableGem: boolean;
-  enableMas: boolean;
-  enableGo: boolean;
-}
 
 const BACKUP_DIR = join(homedir(), ".universal-updater-backups");
 const DESKTOP_DIR = join(homedir(), "Desktop");
@@ -52,10 +39,11 @@ type BackupFile = {
   size: number;
 };
 
-async function createBackup(): Promise<{
+export async function createBackup(): Promise<{
   desktopPath: string;
   hiddenPath: string;
 }> {
+  // prefs resolved where used in callers; Raycast generates `Preferences` type
   const prefs = getPreferenceValues<Preferences>();
 
   const enabledIds = (
@@ -97,7 +85,7 @@ async function createBackup(): Promise<{
     }
   }
 
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const timestamp = new Date().toISOString().replaceAll(/[:.]/, "-");
   const filename = `universal-backup-${timestamp}.json`;
   const jsonContent = JSON.stringify(backup, null, 2);
 
@@ -127,7 +115,8 @@ async function createBackup(): Promise<{
   // Send macOS notification
   try {
     const notifScript = `display notification "Backup created with ${packageCount} packages" with title "Universal Updater" subtitle "${filename}"`;
-    execSync(`osascript -e '${notifScript.replace(/'/g, "'\\''")}'`);
+    const escaped = notifScript.replaceAll("'", "'\\''";
+    execSync(`osascript -e '${escaped}'`);
   } catch {
     // Notification not critical
   }
@@ -167,9 +156,10 @@ async function rollbackToBackup(filePath: string): Promise<string> {
         await installPackage(ecosystem, name);
         installed++;
         totalRestored++;
-      } catch (err) {
+      } catch (err: unknown) {
         failed++;
         totalFailed++;
+        // Continue if individual package restore fails
       }
     }
 
@@ -183,7 +173,8 @@ async function rollbackToBackup(filePath: string): Promise<string> {
   // Send success notification
   try {
     const notifScript = `display notification "${totalRestored} packages restored" with title "Universal Updater" subtitle "Restore completed"`;
-    execSync(`osascript -e '${notifScript.replace(/'/g, "'\\''")}'`);
+    const escaped = notifScript.replaceAll("'", "'\\''";
+    execSync(`osascript -e '${escaped}'`);
   } catch {
     // Notification not critical
   }
@@ -211,7 +202,7 @@ function listBackups(): BackupFile[] {
           .replace("backup-", "")
           .replace("universal-backup-", "")
           .replace(".json", "");
-        const isoTime = timestamp.replace(/-/g, (m: string, i: number) => {
+        const isoTime = timestamp.replaceAll("-", (m: string, i: number) => {
           if (i === 10 || i === 13) return ":";
           if (i === 16) return ".";
           return m;
@@ -232,7 +223,7 @@ function listBackups(): BackupFile[] {
   }
 }
 
-function BackupDetailView(props: { backup: BackupFile }) {
+function BackupDetailView(props: Readonly<{ backup: BackupFile }>) {
   const { backup } = props;
   const [content, setContent] = useState("");
   const [rollbackResult, setRollbackResult] = useState<string | null>(null);
@@ -378,8 +369,9 @@ export default function Command() {
       // Use macOS file picker via osascript
       const script = `set response to (choose file of type {"public.json", "com.apple.json"} with prompt "Select backup JSON file")
 return POSIX path of response`;
+      const escaped = script.replaceAll("'", "'\\''";
       const result = execSync(
-        `osascript -e '${script.replace(/'/g, "'\\''")}'`,
+        `osascript -e '${escaped}'`,
         {
           encoding: "utf-8",
         },

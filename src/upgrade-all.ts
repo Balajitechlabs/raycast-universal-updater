@@ -36,23 +36,7 @@ import {
   upgradeMas,
   upgradeGo,
 } from "./ecosystems";
-
-interface Preferences {
-  enableBrew: boolean;
-  enableNpm: boolean;
-  enableYarn: boolean;
-  enablePnpm: boolean;
-  enablePip: boolean;
-  enablePipx: boolean;
-  enableCargo: boolean;
-  enableGem: boolean;
-  enableMas: boolean;
-  enableGo: boolean;
-  confirmBeforeUpgrade: boolean;
-  dryRunMode: boolean;
-  parallelUpgrade: boolean;
-  backupBeforeUpgrade: boolean;
-}
+import { createBackup } from "./export-backups";
 
 type EcosystemJob = {
   name: string;
@@ -75,28 +59,17 @@ export default async function Command() {
       name: "npm (global)",
       enabled: prefs.enableNpm,
       check: checkNpm,
-      upgrade: upgradeNpm,
-    },
-    {
-      name: "yarn (global)",
-      enabled: prefs.enableYarn,
-      check: checkYarn,
-      upgrade: upgradeYarn,
-    },
-    {
-      name: "pnpm (global)",
-      enabled: prefs.enablePnpm,
-      check: checkPnpm,
-      upgrade: upgradePnpm,
-    },
-    {
-      name: "pip",
-      enabled: prefs.enablePip,
-      check: checkPip,
-      upgrade: upgradePip,
-    },
-    {
-      name: "pipx",
+    upgradeNpm,
+    upgradeYarn,
+    upgradePnpm,
+    upgradePip,
+    upgradePipx,
+    upgradeCargo,
+    upgradeGem,
+    upgradeMas,
+    upgradeGo,
+  } from "./ecosystems";
+  import { createBackup } from "./export-backups";
       enabled: prefs.enablePipx,
       check: checkPipx,
       upgrade: upgradePipx,

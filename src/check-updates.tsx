@@ -4,17 +4,17 @@ import {
   Alert,
   Color,
   Detail,
+  Form,
   Icon,
   List,
-  Form,
+  Toast,
   confirmAlert,
   getPreferenceValues,
   openExtensionPreferences,
   showHUD,
   showToast,
-  Toast,
 } from "@raycast/api";
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { execFileSync } from "child_process";
 
 import {
@@ -24,52 +24,28 @@ import {
   checkBrew,
   checkCargo,
   checkGem,
+  checkGo,
   checkMas,
   checkNpm,
   checkPip,
   checkPipx,
-  checkYarn,
   checkPnpm,
-  checkGo,
+  checkYarn,
+  installPackage,
+  isEcosystemAvailable,
+  listInstalledPackages,
   upgradeBrew,
   upgradeCargo,
   upgradeGem,
+  upgradeGo,
   upgradeMas,
   upgradeNpm,
   upgradePip,
   upgradePipx,
-  upgradeYarn,
   upgradePnpm,
-  upgradeGo,
-  installPackage,
-  listInstalledPackages,
+  upgradeYarn,
 } from "./ecosystems";
-
-interface Preferences {
-  enableBrew: boolean;
-  enableNpm: boolean;
-  enableYarn: boolean;
-  enablePnpm: boolean;
-  enablePip: boolean;
-  enablePipx: boolean;
-  enableCargo: boolean;
-  enableGem: boolean;
-  enableMas: boolean;
-  enableGo: boolean;
-  confirmBeforeUpgrade: boolean;
-  showUpToDateEcosystems: boolean;
-  dryRunMode: boolean;
-  parallelUpgrade: boolean;
-  sortBy: "name" | "nameDesc" | "updateSize";
-  showUpdateDetails: boolean;
-  autoRefreshInterval: string;
-  notificationsEnabled: boolean;
-  backupBeforeUpgrade: boolean;
-  skipMajorVersions: boolean;
-  logLevel: "silent" | "error" | "warn" | "info" | "debug";
-  compactMode: boolean;
-  showLastCheckTime: boolean;
-}
+import { createBackup } from "./export-backups";
 
 type StatusFilter = "all" | "outdated" | "uptodate" | "errors";
 type StatusKind = Exclude<StatusFilter, "all">;
@@ -101,20 +77,9 @@ const ECOSYSTEM_DEFS: EcosystemDef[] = [
   },
   {
     id: "npm",
+    isEcosystemAvailable,
     name: "npm (global)",
-    icon: Icon.Box,
-    preferenceKey: "enableNpm",
-    checker: checkNpm,
-    upgrader: upgradeNpm,
-    checkCommand: "npm outdated -g --json",
-    upgradeCommand: "npm update -g",
-    dryRunCommand: "npm outdated -g --json",
-  },
-  {
-    id: "yarn",
-    name: "yarn (global)",
-    icon: Icon.Layers,
-    preferenceKey: "enableYarn",
+  import { createBackup } from "./export-backups";
     checker: checkYarn,
     upgrader: upgradeYarn,
     checkCommand: "yarn global outdated --json",
