@@ -36,7 +36,6 @@ import {
   upgradeMas,
   upgradeGo,
 } from "./ecosystems";
-import { createBackup } from "./export-backups";
 
 type EcosystemJob = {
   name: string;

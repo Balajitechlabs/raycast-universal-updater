@@ -370,12 +370,9 @@ export default function Command() {
       const script = `set response to (choose file of type {"public.json", "com.apple.json"} with prompt "Select backup JSON file")
 return POSIX path of response`;
       const escaped = script.replaceAll("'", "'\\''");
-      const result = execSync(
-        `osascript -e '${escaped}'`,
-        {
-          encoding: "utf-8",
-        },
-      ).trim();
+      const result = execSync(`osascript -e '${escaped}'`, {
+        encoding: "utf-8",
+      }).trim();
 
       if (!result) return;
 
